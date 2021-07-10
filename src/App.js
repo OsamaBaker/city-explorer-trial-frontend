@@ -4,6 +4,7 @@ import axios from "axios";
 import Location from "./components/Location";
 import { Card, CardGroup } from "react-bootstrap";
 import Weather from "./components/Weather";
+import Movie from "./components/Movie";
 
 export class App extends Component {
   constructor(props) {
@@ -13,6 +14,7 @@ export class App extends Component {
       cityData: {},
       locationImage: "",
       weatherInfo: [],
+      movieInfo: [],
     };
   }
 
@@ -21,11 +23,10 @@ export class App extends Component {
   handleEvents = async (e) => {
     e.preventDefault();
 
-    
     await this.setState({
       searchQuery: e.target.city.value,
     });
-    
+
     //locationIQ
     let url = `${process.env.REACT_APP_REACTAPP_SERVER}/location?searchQuery=${this.state.searchQuery}`;
 
@@ -38,20 +39,24 @@ export class App extends Component {
       locationImage: `https://maps.locationiq.com/v3/staticmap?key=${process.env.REACT_APP_LOCATIONIQ_API_KEY}&center=${this.state.cityData.lat},${this.state.cityData.lon}&zoom=15`,
     });
 
-    
-  // Get Weather
-  let weatherUrl = `${process.env.REACT_APP_REACTAPP_SERVER}/weather?searchQuery=${this.state.searchQuery}`
+    // Get Weather
+    let weatherUrl = `${process.env.REACT_APP_REACTAPP_SERVER}/weather?searchQuery=${this.state.searchQuery}`;
 
-  let weatherData = await axios.get(weatherUrl);
+    let weatherData = await axios.get(weatherUrl);
 
-  await this.setState({
-    weatherInfo: weatherData.data
-  })
-  console.log(this.state.weatherInfo)
+    await this.setState({
+      weatherInfo: weatherData.data,
+    });
+
+    // Get Movies
+    let moviesUrl = `${process.env.REACT_APP_REACTAPP_SERVER}/movies?searchQuery=${this.state.searchQuery}`;
+
+    let moviesData = await axios.get(moviesUrl);
+
+    await this.setState({
+      movieInfo: moviesData.data,
+    });
   };
-
-
-
 
   render() {
     return (
@@ -65,14 +70,30 @@ export class App extends Component {
             />
           </Card>
         </CardGroup>
-        {this.state.weatherInfo.map((item,idx) => {
-          return(
+        {this.state.weatherInfo.map((item, idx) => {
+          return (
             <CardGroup>
-          <Card>
-          <Weather valid_date={item.valid_date} description={item.description} />
-          </Card>
-        </CardGroup>
-          )
+              <Card>
+                <Weather
+                  valid_date={item.valid_date}
+                  description={item.description}
+                />
+              </Card>
+            </CardGroup>
+          );
+        })}
+        {this.state.movieInfo.map((item, idx) => {
+          return (
+            <CardGroup>
+              <Card>
+                <Movie
+                  title={item.title}
+                  vote_average={item.vote_average}
+                  poster_path={item.poster_path}
+                />
+              </Card>
+            </CardGroup>
+          );
         })}
       </div>
     );
